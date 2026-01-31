@@ -191,7 +191,6 @@ class Patcher {
         log(`Всего изменено файлов: ${patchedCount}`, 'info');
     }
 
-    // 4. СБОРКА
     build() {
         log('Сборка нового APK...', 'info');
         try {
@@ -203,46 +202,54 @@ class Patcher {
         }
     }
 
-    // 5. ПОДПИСЬ
     sign() {
-        log('Подпись APK твоим ключом...', 'info');
+        log('Подпись APK...', 'info');
 
         if (!fs.existsSync(CONFIG.signerPath)) {
-            log(`Не найден ${CONFIG.signerPath} (uber-apk-signer)`, 'error');
-            process.exit(1);
+            throw new Error(`Не найден файл сайнера: ${CONFIG.signerPath}`);
         }
         if (!fs.existsSync(CONFIG.keystore.path)) {
-            log(`Не найден ключ ${CONFIG.keystore.path}! Сгенерируй его через keytool.`, 'error');
-            process.exit(1);
+            throw new Error(`Не найден файл ключа: ${CONFIG.keystore.path}`);
+        }
+
+        if (!CONFIG.keystore.alias || !CONFIG.keystore.password) {
+            console.error('DEBUG Info:');
+            console.error(`Alias present: ${!!CONFIG.keystore.alias}`);
+            console.error(`Password present: ${!!CONFIG.keystore.password}`);
+            throw new Error('❌ ОШИБКА: Не заданы KEY_ALIAS или KEY_PASSWORD в Secrets!');
         }
 
         try {
             const args = [
-                `-jar ${CONFIG.signerPath}`,
-                `--apks ${CONFIG.unsignedApk}`,
-                `--ks ${CONFIG.keystore.path}`,
-                `--ksAlias ${CONFIG.keystore.alias}`,
-                `--ksPass ${CONFIG.keystore.password}`,
-                `--ksKeyPass ${CONFIG.keystore.password}`,
-                `--overwrite`
+                `-jar "${CONFIG.signerPath}"`,
+                `--apks "${CONFIG.unsignedApk}"`,
+                `--ks "${CONFIG.keystore.path}"`,
+                `--ksAlias "${CONFIG.keystore.alias}"`,
+                `--ksPass "${CONFIG.keystore.password}"`,
+                `--ksKeyPass "${CONFIG.keystore.password}"`,
+                `--overwrite` 
             ].join(' ');
 
+            log('Запуск Uber Apk Signer...', 'info');
             execSync(`java ${args}`, { stdio: 'inherit' });
+            
+            const expectedSignedName = CONFIG.unsignedApk.replace('.apk', '-aligned-signed.apk');
+            let sourceFile = '';
 
-            const signedFile = CONFIG.unsignedApk.replace('.apk', '-aligned-signed.apk');
-
-            if (fs.existsSync(signedFile)) {
-                fs.renameSync(signedFile, CONFIG.finalApk);
-                
-                fs.removeSync(CONFIG.outputApk);
-                fs.removeSync(CONFIG.unsignedApk);
-                fs.removeSync(CONFIG.decodedDir);
-
-                log(`🎉 ГОТОВО! Файл: ${CONFIG.finalApk}`, 'success');
-                log(`ℹ️  Этот файл можно устанавливать поверх предыдущей версии (обновление).`, 'info');
+            if (fs.existsSync(expectedSignedName)) {
+                sourceFile = expectedSignedName;
+            } else if (fs.existsSync(CONFIG.unsignedApk)) {
+                sourceFile = CONFIG.unsignedApk;
             } else {
-                throw new Error('Подписанный файл не найден. Ошибка сайнера.');
+                throw new Error('Подписанный файл не найден после работы сайнера.');
             }
+
+            fs.renameSync(sourceFile, CONFIG.finalApk);
+            
+            const cleanup = [CONFIG.outputApk, CONFIG.decodedDir, CONFIG.unsignedApk, 'temp_rustore_app.zip'];
+            cleanup.forEach(p => fs.rmSync(p, { recursive: true, force: true }));
+
+            log(`🎉 ГОТОВО! Файл: ${CONFIG.finalApk}`, 'success');
 
         } catch (e) {
             console.error(e);
