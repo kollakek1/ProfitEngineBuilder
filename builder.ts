@@ -6,6 +6,7 @@ import { createWriteStream, unlinkSync, writeFileSync } from 'fs';
 import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
 import AdmZip from 'adm-zip';
+import 'dotenv/config'
 
 const CONFIG = {
     packageName: 'ru.wb.courier',
@@ -140,7 +141,7 @@ class Patcher {
     }
 
     decompile() {
-        log('Разборка APK (это может занять время)...', 'info');
+        log('Разборка APK...', 'info');
         
         if (fs.existsSync(CONFIG.decodedDir)) {
             fs.rmSync(CONFIG.decodedDir, { recursive: true, force: true });
