@@ -53,14 +53,20 @@ class Patcher {
 
             if (!appId || !versionId) {
                 console.error('API Response:', JSON.stringify(info));
-                throw new Error('Не удалось получить appId или versionId из ответа RuStore');
+                throw new Error('Не удалось получить appId или versionId');
             }
 
-            log(`Найдена версия: ${versionName} (AppID: ${appId}, VerID: ${versionId})`, 'success');
+            log(`Найдена версия: ${versionName}`, 'success');
 
             const linkUrl = 'https://backapi.rustore.ru/applicationData/download-link';
             
-            const payload = { appId, packageName: CONFIG.packageName, versionId };
+            const payload = { 
+                appId, 
+                packageName: CONFIG.packageName, 
+                versionId,
+                firstInstall: true 
+            };
+            
             console.log('Sending Payload:', JSON.stringify(payload));
 
             const linkRes = await fetch(linkUrl, {
@@ -76,7 +82,7 @@ class Patcher {
 
             if (!linkRes.ok) {
                 const errText = await linkRes.text();
-                throw new Error(`Link Error: ${linkRes.status} ${linkRes.statusText} | Body: ${errText}`);
+                throw new Error(`Link Error: ${linkRes.status} | Body: ${errText}`);
             }
             
             const linkData = await linkRes.json() as any;
