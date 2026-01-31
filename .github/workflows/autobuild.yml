@@ -1,6 +1,7 @@
 name: WB Auto-Updater
 
 on:
+  push:
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
