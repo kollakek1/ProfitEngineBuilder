@@ -90,7 +90,6 @@ class Patcher {
 
             console.log('RuStore Link Response:', JSON.stringify(linkData, null, 2));
 
-            // ИСПРАВЛЕНИЕ 1: Ищем apkUrl, а не url
             const downloadUrl = linkData.body?.apkUrl || linkData.body?.url;
 
             if (!downloadUrl) {
@@ -101,7 +100,6 @@ class Patcher {
             const downloadRes = await fetch(downloadUrl);
             if (!downloadRes.ok || !downloadRes.body) throw new Error('Download failed');
 
-            // Проверяем, это ZIP или APK
             const isZip = downloadUrl.endsWith('.zip');
             
             if (isZip) {
