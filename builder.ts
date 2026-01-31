@@ -86,9 +86,17 @@ class Patcher {
             }
             
             const linkData = await linkRes.json() as any;
+
+            console.log('RuStore Link Response:', JSON.stringify(linkData, null, 2));
+
+            const downloadUrl = linkData.body?.url || linkData.url;
+
+            if (!downloadUrl) {
+                throw new Error('❌ URL для скачивания не найден в ответе RuStore!');
+            }
             
-            log('Скачивание APK...', 'info');
-            const downloadRes = await fetch(linkData.body.url);
+            log(`Скачивание APK с ${downloadUrl}...`, 'info');
+            const downloadRes = await fetch(downloadUrl);
             if (!downloadRes.ok || !downloadRes.body) throw new Error('Download failed');
 
             const fileStream = createWriteStream(CONFIG.outputApk);
