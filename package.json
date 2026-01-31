@@ -3,16 +3,16 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "start": "ts-node --esm builder.ts"
+    "start": "npx tsx builder.ts"
   },
   "dependencies": {
     "fs-extra": "^11.2.0",
-    "glob": "^10.3.10"
+    "glob": "^10.3.10",
+    "tsx": "^4.7.1"
   },
   "devDependencies": {
     "@types/fs-extra": "^11.0.4",
     "@types/node": "^20.11.0",
-    "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }
 }
