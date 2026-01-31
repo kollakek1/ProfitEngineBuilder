@@ -40,22 +40,45 @@ class Patcher {
 
         try {
             const infoUrl = `https://backapi.rustore.ru/applicationData/overallInfo/${CONFIG.packageName}`;
-            const infoRes = await fetch(infoUrl);
+            const infoRes = await fetch(infoUrl, {
+                headers: {
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                }
+            });
+            
             if (!infoRes.ok) throw new Error(`Info Error: ${infoRes.statusText}`);
             
             const info = await infoRes.json() as any;
             const { appId, versionId, versionName } = info.body;
 
-            log(`Найдена версия: ${versionName}`, 'success');
+            if (!appId || !versionId) {
+                console.error('API Response:', JSON.stringify(info));
+                throw new Error('Не удалось получить appId или versionId из ответа RuStore');
+            }
+
+            log(`Найдена версия: ${versionName} (AppID: ${appId}, VerID: ${versionId})`, 'success');
 
             const linkUrl = 'https://backapi.rustore.ru/applicationData/download-link';
+            
+            const payload = { appId, packageName: CONFIG.packageName, versionId };
+            console.log('Sending Payload:', JSON.stringify(payload));
+
             const linkRes = await fetch(linkUrl, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ appId, packageName: CONFIG.packageName, versionId })
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Origin': 'https://www.rustore.ru',
+                    'Referer': 'https://www.rustore.ru/',
+                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36'
+                },
+                body: JSON.stringify(payload)
             });
 
-            if (!linkRes.ok) throw new Error(`Link Error: ${linkRes.statusText}`);
+            if (!linkRes.ok) {
+                const errText = await linkRes.text();
+                throw new Error(`Link Error: ${linkRes.status} ${linkRes.statusText} | Body: ${errText}`);
+            }
+            
             const linkData = await linkRes.json() as any;
             
             log('Скачивание APK...', 'info');
@@ -63,7 +86,7 @@ class Patcher {
             if (!downloadRes.ok || !downloadRes.body) throw new Error('Download failed');
 
             const fileStream = createWriteStream(CONFIG.outputApk);
-            // @ts-ignore (stream types mismatch fix)
+            // @ts-ignore
             await pipeline(Readable.fromWeb(downloadRes.body), fileStream);
             
             log('Файл скачан успешно.', 'success');
