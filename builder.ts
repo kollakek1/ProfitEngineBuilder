@@ -2,9 +2,10 @@ import fs from 'fs-extra';
 import path from 'path';
 import { execSync } from 'child_process';
 import { glob } from 'glob';
-import { createWriteStream } from 'fs';
+import { createWriteStream, unlinkSync, writeFileSync } from 'fs';
 import { pipeline } from 'stream/promises';
 import { Readable } from 'stream';
+import AdmZip from 'adm-zip';
 
 const CONFIG = {
     packageName: 'ru.wb.courier',
@@ -89,21 +90,50 @@ class Patcher {
 
             console.log('RuStore Link Response:', JSON.stringify(linkData, null, 2));
 
-            const downloadUrl = linkData.body?.url || linkData.url;
+            // ИСПРАВЛЕНИЕ 1: Ищем apkUrl, а не url
+            const downloadUrl = linkData.body?.apkUrl || linkData.body?.url;
 
             if (!downloadUrl) {
-                throw new Error('❌ URL для скачивания не найден в ответе RuStore!');
+                throw new Error('❌ URL для скачивания не найден в ответе RuStore (проверены apkUrl и url)!');
             }
             
-            log(`Скачивание APK с ${downloadUrl}...`, 'info');
+            log(`Скачивание с ${downloadUrl}...`, 'info');
             const downloadRes = await fetch(downloadUrl);
             if (!downloadRes.ok || !downloadRes.body) throw new Error('Download failed');
 
-            const fileStream = createWriteStream(CONFIG.outputApk);
-            // @ts-ignore
-            await pipeline(Readable.fromWeb(downloadRes.body), fileStream);
+            // Проверяем, это ZIP или APK
+            const isZip = downloadUrl.endsWith('.zip');
             
-            log('Файл скачан успешно.', 'success');
+            if (isZip) {
+                log('Обнаружен ZIP архив. Скачивание во временный файл...', 'info');
+                const tempZipPath = 'temp_rustore_app.zip';
+                const tempStream = createWriteStream(tempZipPath);
+                
+                // @ts-ignore
+                await pipeline(Readable.fromWeb(downloadRes.body), tempStream);
+                
+                log('Архив скачан. Распаковка APK...', 'info');
+                
+                const zip = new AdmZip(tempZipPath);
+                const zipEntries = zip.getEntries();
+                
+                const apkEntry = zipEntries.find(entry => entry.entryName.endsWith('.apk'));
+                
+                if (!apkEntry) {
+                    throw new Error('Внутри ZIP архива не найден файл .apk');
+                }
+
+                writeFileSync(CONFIG.outputApk, apkEntry.getData());
+                
+                unlinkSync(tempZipPath);
+                
+                log(`APK успешно извлечен: ${apkEntry.entryName} -> ${CONFIG.outputApk}`, 'success');
+            } else {
+                const fileStream = createWriteStream(CONFIG.outputApk);
+                // @ts-ignore
+                await pipeline(Readable.fromWeb(downloadRes.body), fileStream);
+                log('APK файл скачан успешно.', 'success');
+            }
 
         } catch (error) {
             console.error(error);
