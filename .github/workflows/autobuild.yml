@@ -41,11 +41,13 @@ jobs:
           fi
 
       - name: Setup Node.js
+        if: steps.check_version.outputs.update_needed == 'true'
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
       - name: Setup Java
+        if: steps.check_version.outputs.update_needed == 'true'
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
