@@ -17,17 +17,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 18
-
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: 'temurin'
-          java-version: '17'
-
       - name: Check for Updates
         id: check_version
         run: |
@@ -50,6 +39,17 @@ jobs:
             echo "update_needed=true" >> $GITHUB_OUTPUT
             echo "version=$LATEST_VER" >> $GITHUB_OUTPUT
           fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'temurin'
+          java-version: '17'
       
       - name: Install Dependencies & Tools
         if: steps.check_version.outputs.update_needed == 'true' || github.event_name == 'workflow_dispatch'
