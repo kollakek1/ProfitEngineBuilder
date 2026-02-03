@@ -33,7 +33,7 @@
 
 ## 🚀 О продукте
 
-**ProfitEngine** — это не просто "бот", это решение, которое полностью меняет подход к работе курьера. 
+**ProfitEngine** - это не просто "бот", это решение, которое полностью меняет подход к работе курьера. 
 
 Мы интегрируемся в нативный клиент WB через модифицированный APK, перехватываем поток данных и позволяем управлять заказами через удобный интерфейс прямо внутри Telegram.
 
@@ -73,18 +73,18 @@
 ## 🏗 Технический стек
 
 ### Backend & Core
-*   ![Deno](https://img.shields.io/badge/Deno-000000?style=flat-square&logo=deno&logoColor=white) **Deno** — Высокопроизводительный Runtime.
-*   ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) **MongoDB + Mongoose** — Надежное хранение данных.
-*   ![Grammy](https://img.shields.io/badge/Grammy-Blue?style=flat-square) **GrammY** — Лучший фреймворк для Telegram ботов.
+*   ![Deno](https://img.shields.io/badge/Deno-000000?style=flat-square&logo=deno&logoColor=white) **Deno** - Высокопроизводительный Runtime.
+*   ![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=flat-square&logo=mongodb&logoColor=white) **MongoDB + Mongoose** - Надежное хранение данных.
+*   ![Grammy](https://img.shields.io/badge/Grammy-Blue?style=flat-square) **GrammY** - Лучший фреймворк для Telegram ботов.
 
 ### Frontend (TMA)
-*   ![Next.js](https://img.shields.io/badge/Next.js-black?style=flat-square&logo=next.js&logoColor=white) **Next.js + React** — Реактивный интерфейс.
-*   ![Tailwind](https://img.shields.io/badge/Tailwind-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white) **Tailwind CSS + Shadcn/UI** — Премиальный дизайн.
-*   ![Zustand](https://img.shields.io/badge/Zustand-orange?style=flat-square) **Zustand** — Управление состоянием.
-*   ![Leaflet](https://img.shields.io/badge/Leaflet-green?style=flat-square&logo=leaflet) **Leaflet** — Интерактивные карты.
+*   ![Next.js](https://img.shields.io/badge/Next.js-black?style=flat-square&logo=next.js&logoColor=white) **Next.js + React** - Реактивный интерфейс.
+*   ![Tailwind](https://img.shields.io/badge/Tailwind-06B6D4?style=flat-square&logo=tailwindcss&logoColor=white) **Tailwind CSS + Shadcn/UI** - Премиальный дизайн.
+*   ![Zustand](https://img.shields.io/badge/Zustand-orange?style=flat-square) **Zustand** - Управление состоянием.
+*   ![Leaflet](https://img.shields.io/badge/Leaflet-green?style=flat-square&logo=leaflet) **Leaflet** - Интерактивные карты.
 
 ### Client Builder (Этот репо)
-*   **TypeScript** + **GitHub Actions** — CI/CD пайплайн для автоматической сборки и патчинга APK.
+*   **TypeScript** + **GitHub Actions** - CI/CD пайплайн для автоматической сборки и патчинга APK.
 
 ---
 
